@@ -1,0 +1,671 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAYKO PLAY IPTV Manager</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- HLS.js Player -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            background-color: #0b111e;
+            color: #f3f4f6;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .active-tab {
+            border-bottom: 2px solid #ef4444;
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #1e293b 0%, #881337 100%);
+        }
+        .gradient-card-icon {
+            background: linear-gradient(135deg, #334155 0%, #9f1239 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b111e] text-slate-100 overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-[#0f172a] border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="p-2 text-slate-300 hover:text-white rounded-lg focus:outline-none" aria-label="Abrir menú">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('playlists')">
+                <!-- Flame Icon -->
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 via-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                    <i class="fa-solid fa-fire text-white text-sm"></i>
+                </div>
+                <span class="font-black text-xl tracking-wider text-white">RAYKO PLAY</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSearchInput()" class="p-2 text-slate-300 hover:text-white rounded-lg">
+                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            </button>
+            <button onclick="toggleLayoutView()" class="p-2 text-slate-300 hover:text-white rounded-lg">
+                <i class="fa-solid fa-list-ul text-lg" id="layoutIcon"></i>
+            </button>
+            <button onclick="openPairModal()" class="p-2 text-slate-300 hover:text-white rounded-lg">
+                <i class="fa-solid fa-[#ffffff] fa-tv text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Drawer -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-[#111827] z-50 transform -translate-x-full transition-transform duration-300 flex flex-col border-r border-slate-800 shadow-2xl">
+        <!-- Sidebar Brand Banner -->
+        <div class="bg-[#0c1322] p-6 flex flex-col items-center justify-center border-b border-slate-800/60">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-yellow-500 via-orange-500 to-red-600 flex items-center justify-center mb-3 shadow-xl shadow-orange-600/30">
+                <i class="fa-solid fa-fire text-4xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-wide">RAYKO PLAY</h2>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="#" onclick="switchView('channels'); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-tv text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">TV / Canales</span>
+            </a>
+            <a href="#" onclick="filterByGroup('Películas'); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-film text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">Películas</span>
+            </a>
+            <a href="#" onclick="filterByGroup('Series'); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-clapperboard text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">Series</span>
+            </a>
+            <a href="#" onclick="switchView('playlists'); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-list text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">Playlists / Servidores</span>
+            </a>
+            
+            <div class="pt-4 border-t border-slate-800/80 my-2"></div>
+
+            <a href="#" onclick="openSettingsModal(); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-gear text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">Ajustes</span>
+            </a>
+            <a href="#" onclick="openPairModal(); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-desktop text-lg text-slate-400 w-6"></i>
+                <span class="font-medium">Emparejar TV</span>
+            </a>
+            <a href="#" onclick="openPremiumModal(); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
+                <i class="fa-solid fa-star text-lg text-yellow-500 w-6"></i>
+                <span class="font-medium text-yellow-400">Premium</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar Version Footer -->
+        <div class="p-4 border-t border-slate-800 text-center text-xs text-slate-500 font-mono">
+            v1.0.9
+        </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4">
+
+        <!-- SEARCH INPUT OVERLAY -->
+        <div id="searchBarContainer" class="hidden mb-4">
+            <div class="relative">
+                <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Buscar canales, películas o deportes..." class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-red-500">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-4 text-slate-400"></i>
+            </div>
+        </div>
+
+        <!-- VIEW 1: PLAYLISTS / SERVERS MANAGER -->
+        <section id="playlistsView" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <span class="text-slate-400 text-sm font-medium" id="playlistsCountText">Listas guardadas (6)</span>
+                <button onclick="openAddModal()" class="gradient-btn hover:opacity-90 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-red-900/20 text-white transition">
+                    <i class="fa-solid fa-plus"></i>
+                    Añadir lista
+                </button>
+            </div>
+
+            <!-- List of Playlist Cards -->
+            <div id="playlistsList" class="space-y-3">
+                <!-- Dynamic server cards load here -->
+            </div>
+        </section>
+
+        <!-- VIEW 2: CHANNELS & EPG BROWSER -->
+        <section id="channelsView" class="hidden space-y-4">
+            <!-- Scrollable Category Tabs Bar -->
+            <div class="overflow-x-auto scrollbar-none pb-2 border-b border-slate-800">
+                <div class="flex items-center space-x-6 min-w-max px-2" id="categoriesContainer">
+                    <!-- Dynamic tabs load here -->
+                </div>
+            </div>
+
+            <!-- Loading Indicator Spinner -->
+            <div id="channelsLoading" class="hidden py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-red-500"></i>
+                <p class="text-sm">Cargando canales del servidor RAYKO...</p>
+            </div>
+
+            <!-- Channels Grid / List -->
+            <div id="channelsList" class="space-y-2">
+                <!-- Dynamic channel rows load here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PLAYER MODAL -->
+    <div id="playerModal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col">
+        <div class="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="closePlayer()" class="text-slate-300 hover:text-white p-2">
+                    <i class="fa-solid fa-arrow-left text-lg"></i>
+                </button>
+                <h3 id="playerChannelTitle" class="font-bold text-white text-base truncate">Reproduciendo Canal</h3>
+            </div>
+            <button onclick="closePlayer()" class="text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <div class="flex-1 bg-black flex items-center justify-center relative">
+            <video id="videoElement" class="w-full h-full max-h-[85vh] object-contain" controls autoplay></video>
+            <div id="playerErrorMsg" class="hidden absolute text-center p-6 bg-slate-900/90 rounded-2xl border border-red-500/30 max-w-sm">
+                <i class="fa-solid fa-triangle-exclamation text-3xl text-yellow-500 mb-2"></i>
+                <p class="text-sm text-slate-200" id="playerErrorText">No se pudo reproducir la señal en vivo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD PLAYLIST MODAL -->
+    <div id="addModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white">Añadir Lista IPTV</h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Nombre de la lista</label>
+                    <input type="text" id="newListName" placeholder="Ej. RAYKO Server VIP" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">URL M3U / M3U8</label>
+                    <input type="url" id="newListUrl" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeAddModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-700 text-slate-300 font-medium text-sm">Cancelar</button>
+                <button onclick="saveNewPlaylist()" class="w-1/2 py-2.5 rounded-xl gradient-btn text-white font-bold text-sm">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAIR TV MODAL -->
+    <div id="pairModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
+            <i class="fa-solid fa-tv text-4xl text-orange-500"></i>
+            <h3 class="text-xl font-bold text-white">Emparejar con Smart TV</h3>
+            <p class="text-xs text-slate-400">Ingresa el código que aparece en la pantalla de tu televisor para sincronizar tu lista RAYKO PLAY.</p>
+            <input type="text" placeholder="Código de 6 dígitos" class="w-full text-center tracking-widest text-lg uppercase bg-slate-900 border border-slate-700 rounded-xl py-3 text-white focus:border-red-500">
+            <button onclick="closePairModal()" class="w-full py-3 rounded-xl gradient-btn font-bold text-white text-sm">Vincular Televisor</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white">Ajustes de Reproducción</h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex items-center justify-between p-3 bg-slate-900 rounded-xl">
+                    <span>Aceleración por Hardware</span>
+                    <input type="checkbox" checked class="accent-red-500 w-4 h-4">
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-900 rounded-xl">
+                    <span>Buffer de Reproducción (seg)</span>
+                    <span class="text-slate-400 font-mono">10s</span>
+                </div>
+                <button onclick="resetDefaultServers()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-red-400 text-xs font-bold rounded-xl border border-slate-700">
+                    Restablecer Servidores por Defecto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM MODAL -->
+    <div id="premiumModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#111827] border border-yellow-500/30 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
+            <i class="fa-solid fa-crown text-4xl text-yellow-400"></i>
+            <h3 class="text-xl font-bold text-white">RAYKO PLAY Premium</h3>
+            <p class="text-xs text-slate-300">Disfruta de reproducciones sin publicidad, sincronización en la nube y máxima calidad HD/4K.</p>
+            <button onclick="closePremiumModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 font-bold text-slate-950 text-sm">Obtener Premium</button>
+        </div>
+    </div>
+
+    <script>
+        // HTML String Escaper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Default IPTV servers requested
+        const defaultPlaylists = [
+            { id: 1, name: "RAYKO Server 1 (Premium GitHub)", url: "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u", active: true },
+            { id: 2, name: "RAYKO Server 2 (Star Latino)", url: "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u", active: true },
+            { id: 3, name: "RAYKO Server 3 (Dale Play)", url: "http://daleplaytv.vip:80/get.php?username=GullermoDominguez&password=LlKng1i4XS&type=m3u_plus&output=m3u8", active: false },
+            { id: 4, name: "RAYKO Server 4 (Stable Channels)", url: "http://live.stablechannels.tv/get.php?username=aydoeoti&password=zG67W8wr3e&type=m3u_plus", active: false },
+            { id: 5, name: "RAYKO Server 5 (IPTV WTF)", url: "http://live.iptv.wtf/get.php?username=sfhqygqj&password=Fgh6K3vq28&type=m3u_plus&output=m3u8", active: false },
+            { id: 6, name: "RAYKO Server 6 (Mica Play)", url: "http://micaplayapp.com:2086/get.php?username=56922108557tch&password=080325tch&type=m3u_plus", active: false }
+        ];
+
+        // Global State
+        let playlists = [];
+        let currentChannels = [];
+        let favoriteIds = new Set([1, 3]);
+        let activeCategory = 'Favoritos';
+        let currentView = 'playlists';
+        let hlsPlayer = null;
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            initPlaylists();
+            renderPlaylists();
+            
+            // Auto load active server channels
+            const activeServer = playlists.find(p => p.active) || playlists[0];
+            if (activeServer) {
+                loadServerChannels(activeServer.url);
+            }
+        };
+
+        function initPlaylists() {
+            const saved = localStorage.getItem('rayko_playlists_v2');
+            if (saved) {
+                try {
+                    playlists = JSON.parse(saved);
+                    if (!Array.isArray(playlists) || playlists.length === 0) playlists = [...defaultPlaylists];
+                } catch(e) {
+                    playlists = [...defaultPlaylists];
+                }
+            } else {
+                playlists = [...defaultPlaylists];
+            }
+            savePlaylists();
+        }
+
+        function savePlaylists() {
+            localStorage.setItem('rayko_playlists_v2', JSON.stringify(playlists));
+        }
+
+        function resetDefaultServers() {
+            playlists = [...defaultPlaylists];
+            savePlaylists();
+            renderPlaylists();
+            closeSettingsModal();
+            const activeServer = playlists[0];
+            loadServerChannels(activeServer.url);
+        }
+
+        // Toggle Sidebar Navigation
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        // Switch Main Views
+        function switchView(viewName) {
+            currentView = viewName;
+            document.getElementById('playlistsView').classList.add('hidden');
+            document.getElementById('channelsView').classList.add('hidden');
+
+            if (viewName === 'playlists') {
+                document.getElementById('playlistsView').classList.remove('hidden');
+            } else {
+                document.getElementById('channelsView').classList.remove('hidden');
+            }
+        }
+
+        // Render Playlist Cards
+        function renderPlaylists() {
+            const container = document.getElementById('playlistsList');
+            document.getElementById('playlistsCountText').innerText = `Listas guardadas (${playlists.length})`;
+
+            container.innerHTML = playlists.map((p, index) => `
+                <div onclick="selectServer(${p.id})" class="bg-[#111827] border ${p.active ? 'border-red-500/50 shadow-lg shadow-red-950/20' : 'border-slate-800/80'} rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-12 h-12 rounded-xl gradient-card-icon flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-list-check text-white text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-white text-base truncate">${escapeHtml(p.name)}</h4>
+                            <p class="text-xs text-amber-500/90 truncate font-mono mt-0.5">${escapeHtml(p.url)}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0 ml-2">
+                        ${p.active ? '<i class="fa-solid fa-check text-slate-300 text-lg"></i>' : ''}
+                        <button onclick="deleteServer(${p.id}, event)" class="p-2 text-slate-500 hover:text-red-400">
+                            <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select and Load Server
+        function selectServer(id) {
+            playlists.forEach(p => p.active = (p.id === id));
+            savePlaylists();
+            renderPlaylists();
+
+            const selected = playlists.find(p => p.id === id);
+            if (selected) {
+                loadServerChannels(selected.url);
+            }
+            switchView('channels');
+        }
+
+        function deleteServer(id, event) {
+            event.stopPropagation();
+            if (playlists.length <= 1) return;
+            playlists = playlists.filter(p => p.id !== id);
+            if (!playlists.some(p => p.active)) playlists[0].active = true;
+            savePlaylists();
+            renderPlaylists();
+        }
+
+        // Fetch & Parse Server Channels M3U
+        async function loadServerChannels(url) {
+            const loading = document.getElementById('channelsLoading');
+            const container = document.getElementById('channelsList');
+            
+            loading.classList.remove('hidden');
+            container.innerHTML = '';
+
+            try {
+                // Fetch from remote URL (raw.githubusercontent.com works directly with CORS)
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                const text = await response.text();
+                
+                const parsed = parseM3U(text);
+                if (parsed.length > 0) {
+                    currentChannels = parsed;
+                } else {
+                    currentChannels = generateFallbackChannels();
+                }
+            } catch (error) {
+                console.warn("Error fetching M3U directly, loading sample list:", error);
+                currentChannels = generateFallbackChannels();
+            } finally {
+                loading.classList.add('hidden');
+                renderCategories();
+                renderChannels();
+            }
+        }
+
+        // M3U Playlist Parser
+        function parseM3U(content) {
+            const lines = content.split('\n');
+            const channels = [];
+            let current = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line.startsWith('#EXTINF:')) {
+                    current = {
+                        id: channels.length + 1,
+                        name: 'Canal RAYKO',
+                        logo: '',
+                        group: 'Deportes',
+                        url: '',
+                        epg: 'Transmisión en vivo'
+                    };
+
+                    const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
+                    if (logoMatch) current.logo = logoMatch[1];
+
+                    const groupMatch = line.match(/group-title="([^"]+)"/i);
+                    if (groupMatch) current.group = groupMatch[1];
+
+                    const commaIdx = line.lastIndexOf(',');
+                    if (commaIdx !== -1) {
+                        current.name = line.substring(commaIdx + 1).trim();
+                    }
+                } else if (line && !line.startsWith('#') && current) {
+                    current.url = line;
+                    channels.push(current);
+                    current = null;
+                }
+            }
+            return channels;
+        }
+
+        // Default Fallback Channels
+        function generateFallbackChannels() {
+            return [
+                { id: 1, name: "TyC Sports HD", logo: "https://placehold.co/100x100/1e293b/38bdf8?text=TyC", group: "Deportes", epg: "Baltazar Noria vs. Lorenzo Gerez", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 2, name: "Fox Deportes", logo: "https://placehold.co/100x100/1e293b/f59e0b?text=FOX", group: "Deportes", epg: "Liga MX - Transmisión Especial", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 3, name: "ESPN 2 | Mexico", logo: "https://placehold.co/100x100/1e293b/ef4444?text=ESPN2", group: "Deportes", epg: "SportsCenter En Vivo", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 4, name: "ESPN 1 | Argentina", logo: "https://placehold.co/100x100/1e293b/ef4444?text=ESPN1", group: "Deportes", epg: "Octavos de final USTA Tennis", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 5, name: "ESPN 2 | Sur", logo: "https://placehold.co/100x100/1e293b/ef4444?text=ESPN2", group: "Deportes", epg: "SportsCenter Noche", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 6, name: "ESPN Deportes", logo: "https://placehold.co/100x100/1e293b/ef4444?text=ESPN", group: "Deportes", epg: "Fútbol Internacional", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 7, name: "Universal Cinema HD", logo: "https://placehold.co/100x100/1e293b/a855f7?text=UNI", group: "Películas", epg: "Alguien en alguna parte", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                { id: 8, name: "TNT Series", logo: "https://placehold.co/100x100/1e293b/3b82f6?text=TNT", group: "Series", epg: "CSI Crime Scene Investigation", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+            ];
+        }
+
+        // Categories Bar
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            const extractedGroups = Array.from(new Set(currentChannels.map(c => c.group || 'General'))).slice(0, 8);
+            const categories = ['Favoritos', 'Todos', ...extractedGroups];
+
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${escapeHtml(cat)}')" class="pb-2 text-sm whitespace-nowrap transition ${activeCategory === cat ? 'active-tab' : 'text-slate-400 hover:text-white'}">
+                    ${escapeHtml(cat)}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategories();
+            renderChannels();
+        }
+
+        function filterByGroup(groupName) {
+            switchView('channels');
+            setCategory(groupName);
+        }
+
+        // Render Channel List
+        function renderChannels() {
+            const container = document.getElementById('channelsList');
+            let filtered = currentChannels;
+
+            if (activeCategory === 'Favoritos') {
+                filtered = currentChannels.filter(c => favoriteIds.has(c.id));
+            } else if (activeCategory !== 'Todos') {
+                filtered = currentChannels.filter(c => (c.group || '').toLowerCase() === activeCategory.toLowerCase());
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-tv text-3xl mb-2"></i>
+                        <p class="text-sm">No hay canales disponibles en este grupo.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(c => {
+                const isFav = favoriteIds.has(c.id);
+                return `
+                    <div onclick="playChannel('${escapeHtml(c.url)}', '${escapeHtml(c.name)}')" class="bg-[#111827]/70 border border-slate-800/60 hover:border-slate-700 rounded-xl p-3 flex items-center justify-between cursor-pointer transition">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                                ${c.logo ? `<img src="${escapeHtml(c.logo)}" alt="" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=TV'">` : `<i class="fa-solid fa-tv text-slate-500"></i>`}
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-white text-sm truncate">${escapeHtml(c.name)}</h4>
+                                <p class="text-xs text-slate-400 truncate mt-0.5">${escapeHtml(c.epg)}</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleFavorite(${c.id}, event)" class="p-2 text-slate-500 hover:text-red-500 shrink-0 ml-2">
+                            <i class="${isFav ? 'fa-solid text-red-500' : 'fa-regular'} fa-heart text-lg"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFavorite(id, event) {
+            event.stopPropagation();
+            if (favoriteIds.has(id)) {
+                favoriteIds.delete(id);
+            } else {
+                favoriteIds.add(id);
+            }
+            renderChannels();
+        }
+
+        // Video Player Logic
+        function playChannel(streamUrl, name) {
+            const modal = document.getElementById('playerModal');
+            const video = document.getElementById('videoElement');
+            const title = document.getElementById('playerChannelTitle');
+            const errorMsg = document.getElementById('playerErrorMsg');
+
+            title.innerText = name;
+            errorMsg.classList.add('hidden');
+            modal.classList.remove('hidden');
+
+            if (Hls.isSupported() && streamUrl.includes('.m3u8')) {
+                if (hlsPlayer) hlsPlayer.destroy();
+                hlsPlayer = new Hls();
+                hlsPlayer.loadSource(streamUrl);
+                hlsPlayer.attachMedia(video);
+                hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(() => {});
+                });
+                hlsPlayer.on(Hls.Events.ERROR, function() {
+                    errorMsg.classList.remove('hidden');
+                });
+            } else {
+                video.src = streamUrl;
+                video.play().catch(() => {
+                    errorMsg.classList.remove('hidden');
+                });
+            }
+        }
+
+        function closePlayer() {
+            const modal = document.getElementById('playerModal');
+            const video = document.getElementById('videoElement');
+            if (hlsPlayer) hlsPlayer.destroy();
+            video.pause();
+            video.src = '';
+            modal.classList.add('hidden');
+        }
+
+        // Search Bar Toggle
+        function toggleSearchInput() {
+            const container = document.getElementById('searchBarContainer');
+            container.classList.toggle('hidden');
+        }
+
+        function handleSearch(query) {
+            if (!query) {
+                renderChannels();
+                return;
+            }
+            const q = query.toLowerCase();
+            const container = document.getElementById('channelsList');
+            const filtered = currentChannels.filter(c => c.name.toLowerCase().includes(q) || (c.group && c.group.toLowerCase().includes(q)));
+            
+            container.innerHTML = filtered.map(c => `
+                <div onclick="playChannel('${escapeHtml(c.url)}', '${escapeHtml(c.name)}')" class="bg-[#111827]/70 border border-slate-800/60 rounded-xl p-3 flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-tv text-slate-400"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-white text-sm truncate">${escapeHtml(c.name)}</h4>
+                            <p class="text-xs text-slate-400 truncate mt-0.5">${escapeHtml(c.epg)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleLayoutView() {
+            // Toggle view mode layout icon
+            const icon = document.getElementById('layoutIcon');
+            icon.classList.toggle('fa-list-ul');
+            icon.classList.toggle('fa-border-all');
+        }
+
+        // Modals Controls
+        function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
+        function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+        
+        function saveNewPlaylist() {
+            const name = document.getElementById('newListName').value.trim();
+            const url = document.getElementById('newListUrl').value.trim();
+            if (!name || !url) return;
+
+            playlists.push({
+                id: Date.now(),
+                name: name,
+                url: url,
+                active: false
+            });
+            savePlaylists();
+            renderPlaylists();
+            closeAddModal();
+        }
+
+        function openPairModal() { document.getElementById('pairModal').classList.remove('hidden'); }
+        function closePairModal() { document.getElementById('pairModal').classList.add('hidden'); }
+
+        function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+        function openPremiumModal() { document.getElementById('premiumModal').classList.remove('hidden'); }
+        function closePremiumModal() { document.getElementById('premiumModal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
