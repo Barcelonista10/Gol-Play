@@ -1,5 +1,4 @@
-```html
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -58,14 +57,14 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button onclick="toggleSearchInput()" class="p-2 text-slate-300 hover:text-white rounded-lg">
+            <button onclick="toggleSearchInput()" class="p-2 text-slate-300 hover:text-white rounded-lg" aria-label="Buscar">
                 <i class="fa-solid fa-magnifying-glass text-lg"></i>
             </button>
-            <button onclick="toggleLayoutView()" class="p-2 text-slate-300 hover:text-white rounded-lg">
+            <button onclick="toggleLayoutView()" class="p-2 text-slate-300 hover:text-white rounded-lg" aria-label="Cambiar vista">
                 <i class="fa-solid fa-list-ul text-lg" id="layoutIcon"></i>
             </button>
-            <button onclick="openPairModal()" class="p-2 text-slate-300 hover:text-white rounded-lg">
-                <i class="fa-solid fa-[#ffffff] fa-tv text-lg"></i>
+            <button onclick="openPairModal()" class="p-2 text-slate-300 hover:text-white rounded-lg" aria-label="Emparejar TV">
+                <i class="fa-solid fa-tv text-lg"></i>
             </button>
         </div>
     </header>
@@ -274,26 +273,28 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Default IPTV servers requested
+        const defaultM3uUrl = "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u";
+
+        // Default IPTV servers configuration - All pointing to the specified URL
         const defaultPlaylists = [
-            { id: 1, name: "RAYKO Server 1 (Premium GitHub)", url: "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u", active: true },
-            { id: 2, name: "RAYKO Server 2 (Star Latino)", url: "http://starlatino.tv:8880/get.php?username=dsn2TvZNPnCR&password=NE3Eb3qSjf6K&type=m3u_plus&output=m3u8", active: false },
-            { id: 3, name: "RAYKO Server 3 (Dale Play)", url: "http://daleplaytv.vip:80/get.php?username=GullermoDominguez&password=LlKng1i4XS&type=m3u_plus&output=m3u8", active: false },
-            { id: 4, name: "RAYKO Server 4 (Stable Channels)", url: "http://live.stablechannels.tv/get.php?username=aydoeoti&password=zG67W8wr3e&type=m3u_plus", active: false },
-            { id: 5, name: "RAYKO Server 5 (IPTV WTF)", url: "http://live.iptv.wtf/get.php?username=sfhqygqj&password=Fgh6K3vq28&type=m3u_plus&output=m3u8", active: false },
-            { id: 6, name: "RAYKO Server 6 (Mica Play)", url: "http://micaplayapp.com:2086/get.php?username=56922108557tch&password=080325tch&type=m3u_plus", active: false }
+            { id: 1, name: "RAYKO Server 1 (Premium VIP)", url: defaultM3uUrl, active: true },
+            { id: 2, name: "RAYKO Server 2 (Star Latino)", url: defaultM3uUrl, active: false },
+            { id: 3, name: "RAYKO Server 3 (Dale Play)", url: defaultM3uUrl, active: false },
+            { id: 4, name: "RAYKO Server 4 (Stable Channels)", url: defaultM3uUrl, active: false },
+            { id: 5, name: "RAYKO Server 5 (IPTV WTF)", url: defaultM3uUrl, active: false },
+            { id: 6, name: "RAYKO Server 6 (Mica Play)", url: defaultM3uUrl, active: false }
         ];
 
-        // Global State
+        // Global State Variables
         let playlists = [];
         let currentChannels = [];
-        let favoriteIds = new Set([1, 3]);
-        let activeCategory = 'Favoritos';
+        let favoriteIds = new Set();
+        let activeCategory = 'Todos';
         let currentView = 'playlists';
         let hlsPlayer = null;
 
-        // Initialize App on Window Load
         window.onload = function() {
+            initFavorites();
             initPlaylists();
             renderPlaylists();
             
@@ -304,8 +305,26 @@
             }
         };
 
+        function initFavorites() {
+            const savedFavs = localStorage.getItem('rayko_favorites_v1');
+            if (savedFavs) {
+                try {
+                    const parsed = JSON.parse(savedFavs);
+                    favoriteIds = new Set(parsed);
+                } catch(e) {
+                    favoriteIds = new Set();
+                }
+            } else {
+                favoriteIds = new Set();
+            }
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('rayko_favorites_v1', JSON.stringify(Array.from(favoriteIds)));
+        }
+
         function initPlaylists() {
-            const saved = localStorage.getItem('rayko_playlists_v2');
+            const saved = localStorage.getItem('rayko_playlists_v5');
             if (saved) {
                 try {
                     playlists = JSON.parse(saved);
@@ -320,7 +339,7 @@
         }
 
         function savePlaylists() {
-            localStorage.setItem('rayko_playlists_v2', JSON.stringify(playlists));
+            localStorage.setItem('rayko_playlists_v5', JSON.stringify(playlists));
         }
 
         function resetDefaultServers() {
@@ -332,7 +351,6 @@
             loadServerChannels(activeServer.url);
         }
 
-        // Toggle Sidebar Navigation
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -345,7 +363,6 @@
             }
         }
 
-        // Switch Main Views
         function switchView(viewName) {
             currentView = viewName;
             document.getElementById('playlistsView').classList.add('hidden');
@@ -358,12 +375,11 @@
             }
         }
 
-        // Render Playlist Cards
         function renderPlaylists() {
             const container = document.getElementById('playlistsList');
             document.getElementById('playlistsCountText').innerText = `Listas guardadas (${playlists.length})`;
 
-            container.innerHTML = playlists.map((p, index) => `
+            container.innerHTML = playlists.map((p) => `
                 <div onclick="selectServer(${p.id})" class="bg-[#111827] border ${p.active ? 'border-red-500/50 shadow-lg shadow-red-950/20' : 'border-slate-800/80'} rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
                     <div class="flex items-center gap-3.5 min-w-0">
                         <div class="w-12 h-12 rounded-xl gradient-card-icon flex items-center justify-center shrink-0">
@@ -371,7 +387,6 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="font-bold text-white text-base truncate">${escapeHtml(p.name)}</h4>
-                            <p class="text-xs text-amber-500/90 truncate font-mono mt-0.5">${escapeHtml(p.url)}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 shrink-0 ml-2">
@@ -384,7 +399,6 @@
             `).join('');
         }
 
-        // Select and Load Server
         function selectServer(id) {
             playlists.forEach(p => p.active = (p.id === id));
             savePlaylists();
@@ -406,7 +420,6 @@
             renderPlaylists();
         }
 
-        // Fetch & Parse Server Channels M3U
         async function loadServerChannels(url) {
             const loading = document.getElementById('channelsLoading');
             const container = document.getElementById('channelsList');
@@ -415,10 +428,18 @@
             container.innerHTML = '';
 
             try {
-                // Fetch from remote URL (raw.githubusercontent.com works directly with CORS)
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("HTTP error " + response.status);
-                const text = await response.text();
+                let text = '';
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error("HTTP error " + response.status);
+                    text = await response.text();
+                } catch (e) {
+                    console.warn("Direct fetch failed, trying proxy...", e);
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error("Proxy HTTP error " + response.status);
+                    text = await response.text();
+                }
                 
                 const parsed = parseM3U(text);
                 if (parsed.length > 0) {
@@ -427,7 +448,7 @@
                     currentChannels = generateFallbackChannels();
                 }
             } catch (error) {
-                console.warn("Error fetching M3U directly, loading sample list:", error);
+                console.warn("Error fetching M3U directly or via proxy, loading fallback list:", error);
                 currentChannels = generateFallbackChannels();
             } finally {
                 loading.classList.add('hidden');
@@ -436,7 +457,6 @@
             }
         }
 
-        // M3U Playlist Parser
         function parseM3U(content) {
             const lines = content.split('\n');
             const channels = [];
@@ -473,7 +493,6 @@
             return channels;
         }
 
-        // Default Fallback Channels
         function generateFallbackChannels() {
             return [
                 { id: 1, name: "TyC Sports HD", logo: "https://placehold.co/100x100/1e293b/38bdf8?text=TyC", group: "Deportes", epg: "Baltazar Noria vs. Lorenzo Gerez", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
@@ -487,7 +506,6 @@
             ];
         }
 
-        // Categories Bar
         function renderCategories() {
             const container = document.getElementById('categoriesContainer');
             const extractedGroups = Array.from(new Set(currentChannels.map(c => c.group || 'General'))).slice(0, 8);
@@ -511,7 +529,6 @@
             setCategory(groupName);
         }
 
-        // Render Channel List
         function renderChannels() {
             const container = document.getElementById('channelsList');
             let filtered = currentChannels;
@@ -523,10 +540,13 @@
             }
 
             if (filtered.length === 0) {
+                const emptyMsg = activeCategory === 'Favoritos' 
+                    ? 'No tienes canales en favoritos. Pulsa el corazón en cualquier canal para agregarlo a tus favoritos.' 
+                    : 'No hay canales disponibles en este grupo.';
                 container.innerHTML = `
                     <div class="text-center py-12 text-slate-500">
-                        <i class="fa-solid fa-tv text-3xl mb-2"></i>
-                        <p class="text-sm">No hay canales disponibles en este grupo.</p>
+                        <i class="fa-solid fa-heart text-3xl mb-2 text-slate-600"></i>
+                        <p class="text-sm px-4">${emptyMsg}</p>
                     </div>
                 `;
                 return;
@@ -560,10 +580,10 @@
             } else {
                 favoriteIds.add(id);
             }
+            saveFavorites();
             renderChannels();
         }
 
-        // Video Player Logic
         function playChannel(streamUrl, name) {
             if (window.AndroidPlayer) {
                 window.AndroidPlayer.play(streamUrl, name);
@@ -606,7 +626,6 @@
             modal.classList.add('hidden');
         }
 
-        // Search Bar Toggle
         function toggleSearchInput() {
             const container = document.getElementById('searchBarContainer');
             container.classList.toggle('hidden');
@@ -637,7 +656,6 @@
         }
 
         function toggleLayoutView() {
-            // Toggle view mode layout icon
             const icon = document.getElementById('layoutIcon');
             icon.classList.toggle('fa-list-ul');
             icon.classList.toggle('fa-border-all');
@@ -674,4 +692,3 @@
     </script>
 </body>
 </html>
-```
