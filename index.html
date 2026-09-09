@@ -1,3 +1,5 @@
+```html
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -39,6 +41,7 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b111e] text-slate-100 overflow-x-hidden">
+
     <!-- Top Navigation Header -->
     <header class="bg-[#0f172a] border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div class="flex items-center gap-3">
@@ -53,6 +56,7 @@
                 <span class="font-black text-xl tracking-wider text-white">RAYKO PLAY</span>
             </div>
         </div>
+
         <div class="flex items-center gap-3">
             <button onclick="toggleSearchInput()" class="p-2 text-slate-300 hover:text-white rounded-lg">
                 <i class="fa-solid fa-magnifying-glass text-lg"></i>
@@ -61,7 +65,7 @@
                 <i class="fa-solid fa-list-ul text-lg" id="layoutIcon"></i>
             </button>
             <button onclick="openPairModal()" class="p-2 text-slate-300 hover:text-white rounded-lg">
-                <i class="fa-solid fa-tv text-lg"></i>
+                <i class="fa-solid fa-[#ffffff] fa-tv text-lg"></i>
             </button>
         </div>
     </header>
@@ -76,6 +80,7 @@
             </div>
             <h2 class="text-2xl font-black text-white tracking-wide">RAYKO PLAY</h2>
         </div>
+
         <!-- Sidebar Navigation Menu -->
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
             <a href="#" onclick="switchView('channels'); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
@@ -94,7 +99,9 @@
                 <i class="fa-solid fa-list text-lg text-slate-400 w-6"></i>
                 <span class="font-medium">Playlists / Servidores</span>
             </a>
+            
             <div class="pt-4 border-t border-slate-800/80 my-2"></div>
+
             <a href="#" onclick="openSettingsModal(); toggleSidebar();" class="flex items-center gap-4 px-4 py-3 text-slate-300 hover:bg-slate-800/70 rounded-xl transition">
                 <i class="fa-solid fa-gear text-lg text-slate-400 w-6"></i>
                 <span class="font-medium">Ajustes</span>
@@ -108,6 +115,7 @@
                 <span class="font-medium text-yellow-400">Premium</span>
             </a>
         </nav>
+
         <!-- Sidebar Version Footer -->
         <div class="p-4 border-t border-slate-800 text-center text-xs text-slate-500 font-mono">
             v1.0.9
@@ -116,6 +124,7 @@
 
     <!-- Main Content Body -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4">
+
         <!-- SEARCH INPUT OVERLAY -->
         <div id="searchBarContainer" class="hidden mb-4">
             <div class="relative">
@@ -129,9 +138,11 @@
             <div class="flex items-center justify-between">
                 <span class="text-slate-400 text-sm font-medium" id="playlistsCountText">Listas guardadas (6)</span>
                 <button onclick="openAddModal()" class="gradient-btn hover:opacity-90 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-red-900/20 text-white transition">
-                    <i class="fa-solid fa-plus"></i> Añadir lista
+                    <i class="fa-solid fa-plus"></i>
+                    Añadir lista
                 </button>
             </div>
+
             <!-- List of Playlist Cards -->
             <div id="playlistsList" class="space-y-3">
                 <!-- Dynamic server cards load here -->
@@ -146,16 +157,19 @@
                     <!-- Dynamic tabs load here -->
                 </div>
             </div>
+
             <!-- Loading Indicator Spinner -->
             <div id="channelsLoading" class="hidden py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
                 <i class="fa-solid fa-circle-notch fa-spin text-3xl text-red-500"></i>
                 <p class="text-sm">Cargando canales del servidor RAYKO...</p>
             </div>
+
             <!-- Channels Grid / List -->
             <div id="channelsList" class="space-y-2">
                 <!-- Dynamic channel rows load here -->
             </div>
         </section>
+
     </main>
 
     <!-- PLAYER MODAL -->
@@ -263,7 +277,7 @@
         // Default IPTV servers requested
         const defaultPlaylists = [
             { id: 1, name: "RAYKO Server 1 (Premium GitHub)", url: "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u", active: true },
-            { id: 2, name: "RAYKO Server 2 (Star Latino)", url: "https://raw.githubusercontent.com/Barcelonista10/Proyecto-RAYKO-PLAY/refs/heads/main/Lista%20Premium1.m3u", active: true },
+            { id: 2, name: "RAYKO Server 2 (Star Latino)", url: "http://starlatino.tv:8880/get.php?username=dsn2TvZNPnCR&password=NE3Eb3qSjf6K&type=m3u_plus&output=m3u8", active: false },
             { id: 3, name: "RAYKO Server 3 (Dale Play)", url: "http://daleplaytv.vip:80/get.php?username=GullermoDominguez&password=LlKng1i4XS&type=m3u_plus&output=m3u8", active: false },
             { id: 4, name: "RAYKO Server 4 (Stable Channels)", url: "http://live.stablechannels.tv/get.php?username=aydoeoti&password=zG67W8wr3e&type=m3u_plus", active: false },
             { id: 5, name: "RAYKO Server 5 (IPTV WTF)", url: "http://live.iptv.wtf/get.php?username=sfhqygqj&password=Fgh6K3vq28&type=m3u_plus&output=m3u8", active: false },
@@ -282,6 +296,7 @@
         window.onload = function() {
             initPlaylists();
             renderPlaylists();
+            
             // Auto load active server channels
             const activeServer = playlists.find(p => p.active) || playlists[0];
             if (activeServer) {
@@ -335,6 +350,7 @@
             currentView = viewName;
             document.getElementById('playlistsView').classList.add('hidden');
             document.getElementById('channelsView').classList.add('hidden');
+
             if (viewName === 'playlists') {
                 document.getElementById('playlistsView').classList.remove('hidden');
             } else {
@@ -346,6 +362,7 @@
         function renderPlaylists() {
             const container = document.getElementById('playlistsList');
             document.getElementById('playlistsCountText').innerText = `Listas guardadas (${playlists.length})`;
+
             container.innerHTML = playlists.map((p, index) => `
                 <div onclick="selectServer(${p.id})" class="bg-[#111827] border ${p.active ? 'border-red-500/50 shadow-lg shadow-red-950/20' : 'border-slate-800/80'} rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
                     <div class="flex items-center gap-3.5 min-w-0">
@@ -372,6 +389,7 @@
             playlists.forEach(p => p.active = (p.id === id));
             savePlaylists();
             renderPlaylists();
+
             const selected = playlists.find(p => p.id === id);
             if (selected) {
                 loadServerChannels(selected.url);
@@ -392,14 +410,16 @@
         async function loadServerChannels(url) {
             const loading = document.getElementById('channelsLoading');
             const container = document.getElementById('channelsList');
+            
             loading.classList.remove('hidden');
             container.innerHTML = '';
-            
+
             try {
                 // Fetch from remote URL (raw.githubusercontent.com works directly with CORS)
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("HTTP error " + response.status);
                 const text = await response.text();
+                
                 const parsed = parseM3U(text);
                 if (parsed.length > 0) {
                     currentChannels = parsed;
@@ -421,7 +441,7 @@
             const lines = content.split('\n');
             const channels = [];
             let current = null;
-            
+
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if (line.startsWith('#EXTINF:')) {
@@ -433,10 +453,13 @@
                         url: '',
                         epg: 'Transmisión en vivo'
                     };
+
                     const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
                     if (logoMatch) current.logo = logoMatch[1];
+
                     const groupMatch = line.match(/group-title="([^"]+)"/i);
                     if (groupMatch) current.group = groupMatch[1];
+
                     const commaIdx = line.lastIndexOf(',');
                     if (commaIdx !== -1) {
                         current.name = line.substring(commaIdx + 1).trim();
@@ -469,6 +492,7 @@
             const container = document.getElementById('categoriesContainer');
             const extractedGroups = Array.from(new Set(currentChannels.map(c => c.group || 'General'))).slice(0, 8);
             const categories = ['Favoritos', 'Todos', ...extractedGroups];
+
             container.innerHTML = categories.map(cat => `
                 <button onclick="setCategory('${escapeHtml(cat)}')" class="pb-2 text-sm whitespace-nowrap transition ${activeCategory === cat ? 'active-tab' : 'text-slate-400 hover:text-white'}">
                     ${escapeHtml(cat)}
@@ -491,6 +515,7 @@
         function renderChannels() {
             const container = document.getElementById('channelsList');
             let filtered = currentChannels;
+
             if (activeCategory === 'Favoritos') {
                 filtered = currentChannels.filter(c => favoriteIds.has(c.id));
             } else if (activeCategory !== 'Todos') {
@@ -538,13 +563,11 @@
             renderChannels();
         }
 
-        // VIDEO PLAYER FUNCTION - MODIFIED TO USE NATIVE BRIDGE
+        // Video Player Logic
         function playChannel(streamUrl, name) {
             if (window.AndroidPlayer) {
-                // Reproduce con ExoPlayer nativo (Android)
                 window.AndroidPlayer.play(streamUrl, name);
             } else {
-                // Respaldo: si se abre en un navegador normal (no la app), usa HLS.js
                 const modal = document.getElementById('playerModal');
                 const video = document.getElementById('videoElement');
                 const title = document.getElementById('playerChannelTitle');
@@ -597,6 +620,7 @@
             const q = query.toLowerCase();
             const container = document.getElementById('channelsList');
             const filtered = currentChannels.filter(c => c.name.toLowerCase().includes(q) || (c.group && c.group.toLowerCase().includes(q)));
+            
             container.innerHTML = filtered.map(c => `
                 <div onclick="playChannel('${escapeHtml(c.url)}', '${escapeHtml(c.name)}')" class="bg-[#111827]/70 border border-slate-800/60 rounded-xl p-3 flex items-center justify-between cursor-pointer">
                     <div class="flex items-center gap-3.5 min-w-0">
@@ -620,18 +644,14 @@
         }
 
         // Modals Controls
-        function openAddModal() {
-            document.getElementById('addModal').classList.remove('hidden');
-        }
-
-        function closeAddModal() {
-            document.getElementById('addModal').classList.add('hidden');
-        }
-
+        function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
+        function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+        
         function saveNewPlaylist() {
             const name = document.getElementById('newListName').value.trim();
             const url = document.getElementById('newListUrl').value.trim();
             if (!name || !url) return;
+
             playlists.push({
                 id: Date.now(),
                 name: name,
@@ -643,29 +663,15 @@
             closeAddModal();
         }
 
-        function openPairModal() {
-            document.getElementById('pairModal').classList.remove('hidden');
-        }
+        function openPairModal() { document.getElementById('pairModal').classList.remove('hidden'); }
+        function closePairModal() { document.getElementById('pairModal').classList.add('hidden'); }
 
-        function closePairModal() {
-            document.getElementById('pairModal').classList.add('hidden');
-        }
+        function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
 
-        function openSettingsModal() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.add('hidden');
-        }
-
-        function openPremiumModal() {
-            document.getElementById('premiumModal').classList.remove('hidden');
-        }
-
-        function closePremiumModal() {
-            document.getElementById('premiumModal').classList.add('hidden');
-        }
+        function openPremiumModal() { document.getElementById('premiumModal').classList.remove('hidden'); }
+        function closePremiumModal() { document.getElementById('premiumModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
+```
